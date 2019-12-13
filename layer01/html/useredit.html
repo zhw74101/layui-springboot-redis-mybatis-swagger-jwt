@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理-登陆</title>
+    <link rel="stylesheet" href="../css/layui/layui.css">
+</head>
+<body>
+<div>
+    <form class="layui-form" action="" lay-filter="example">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">ID</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="id" lay-verify="title" autocomplete="off" class="layui-input" readonly="readonly">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">用户code</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="usercode" lay-verify="required" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">用户名</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="username" lay-verify="required" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">用户密码</label>
+                <div class="layui-input-inline">
+                    <input type="password" name="userpassword" lay-verify="required" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">电话</label>
+                <div class="layui-input-inline">
+                    <input type="tel" name="phone" lay-verify="required|phone" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">生日</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="birthday" id="date" lay-verify="date" placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">地址</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="address" id="address" lay-verify="required"  autocomplete="off" class="layui-input">
+                </div>
+            </div>
+
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">角色</label>
+            <div class="layui-input-block" id="userrolecheckeds">
+
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1">立即提交</button>
+<!--                <button type="reset" class="layui-btn layui-btn-primary">重置</button>-->
+            </div>
+        </div>
+    </form>
+</div>
+<script src="../js/layui/layui.js"></script>
+<script>
+    layui.use(['form', 'layedit', 'laydate','element','layer'], function(){
+        var form = layui.form
+            ,layer = layui.layer
+            ,layedit = layui.layedit
+            ,laydate = layui.laydate
+            ,element = layui.element,
+            $ = layui.jquery;
+
+        laydate.render({
+            elem:'#date'
+        })
+
+        function oneValues(){
+            var result;
+            var url=window.location.search; //获取url中"?"符后的字串
+            if(url.indexOf("?")!=-1){
+                result = url.substr(url.indexOf("=")+1);
+            }
+            return result;
+        }
+
+        // alert(window.location.search)
+
+        //加载角色信息
+        $.ajax({
+            url:"http://localhost:8080/role/getrolelist",
+            success:function (data) {
+                //遍历添加复选框
+
+                $.each(data,function () {
+                    var role = $(this);
+                    // console.log(role[0])
+                    $("#userrolecheckeds").append("" +
+                        "<input type=\"checkbox\" name=\"role\" value=\""+role[0].roleValue+"\" title=\""+role[0].roleName+"\">" +
+                        "");
+                })
+
+            }
+
+        })
+        var id = 0;
+        //去加载后台接口数据
+        $.ajax({
+            url:"http://localhost:8080/user/getuserbyid",
+            data:{
+                id:oneValues()
+            },
+            success:function (data) {
+                id = data.id;
+                
+                form.val('example', {
+                    "id": data.id // "name": "value"
+                    ,"usercode": data.usercode
+                    ,"username": data.username
+                    ,"userpassword": data.userpassword
+                    ,"phone": data.phone
+                    ,"birthday": data.birthday
+                    ,"address": data.address
+                    // ,"role":data.roles
+                });
+
+
+                //回显复选框的选中状态
+                $.each(data.role.split(","),function () {
+                    var roleValue = $(this);
+                    // console.log($("input:checkbox[value="+roleValue[0]+"]")[0])
+                    $("input:checkbox[value="+roleValue[0]+"]").attr("checked","checked")
+                })
+                form.render('checkbox', 'example');
+            }
+
+        })
+
+
+
+        form.on('submit(demo1)',function (data) {
+
+            //处理复选框数据
+
+            quotation = new Array();
+            $("input:checkbox[name='role']:checked").each(function(){
+                quotation.push($(this).val());
+            });
+            var json = "";
+            for (var i = 0; i < quotation.length; i++) {
+                json += quotation[i] + ",";
+            }
+            data.field.role =  json.substring(0,json.lastIndexOf(",")) ;
+
+            //提交更新
+            $.ajax({
+                url:"http://localhost:8080/user/updateUser",
+                type:"get",
+                dataType:"json",
+                data:data.field,
+                success:function (data) {
+                    //更改成功
+                    if(data.code == 0){
+                        layer.confirm('修改成功，是否返回并关闭当前选项卡？', {
+                            btn: ['返回', '继续编辑']
+                        }, function () {
+                            parent.layui.element.tabDelete('demo',id);
+                            parent.layui.element.tabChange('demo',"101010");
+                        })
+                    }else{
+                        layer.msg(data.msg)
+                    }
+                }
+            })
+            return false;
+
+        })
+
+        function getCookie(cname)
+        {
+            var name = cname + "=";
+            var ca = document.cookie.split(';');
+            for(var i=0; i<ca.length; i++)
+            {
+                var c = ca[i].trim();
+                if (c.indexOf(name)==0) return c.substring(name.length,c.length);
+            }
+            return "";
+        }
+    })
+
+
+</script>
+</body>
+</html>

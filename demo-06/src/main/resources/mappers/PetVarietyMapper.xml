@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dao.PetVarietyMapper">
+  <resultMap id="BaseResultMap" type="com.example.demo.pojo.PetVariety">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="variety" jdbcType="VARCHAR" property="variety" />
+    <result column="type" jdbcType="INTEGER" property="type" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, variety, type
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from pet_variety
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="getPetVarietyListByPetType" parameterType="int" resultMap="BaseResultMap">
+    select * from pet_variety where type = #{typeId}
+  </select>
+
+  <select id="getPetVarietyListBefor10" resultMap="BaseResultMap">
+    SELECT * from pet_variety limit 0,10
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from pet_variety
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.example.demo.pojo.PetVariety">
+    insert into pet_variety (id, variety, type
+      )
+    values (#{id,jdbcType=INTEGER}, #{variety,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.example.demo.pojo.PetVariety">
+    insert into pet_variety
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="variety != null">
+        variety,
+      </if>
+      <if test="type != null">
+        type,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="variety != null">
+        #{variety,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null">
+        #{type,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.example.demo.pojo.PetVariety">
+    update pet_variety
+    <set>
+      <if test="variety != null">
+        variety = #{variety,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null">
+        type = #{type,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.example.demo.pojo.PetVariety">
+    update pet_variety
+    set variety = #{variety,jdbcType=VARCHAR},
+      type = #{type,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

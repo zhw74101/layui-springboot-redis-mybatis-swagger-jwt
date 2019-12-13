@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    用户名:<input type="text" id="name"><br>
+    密码:<input type="password" id="pass"><br>
+    <input type="button" value="登录" id="login">
+<script src="../js/JQ/jquery-3.4.1.js"></script>
+<script>
+    $(function () {
+        $("#login").click(function () {
+            var name = $("#name").val()
+            var pass = $("#pass").val()
+            $.ajax({
+                url:"http://localhost:8080/user/login",
+                data:{
+                    name:name,
+                    password:pass
+                },
+                dataType:"json",
+                type:"post",
+                success:function (data) {
+                    // alert(data.token);
+                    document.cookie = "token=" + data.token;
+                    // alert(getCookie("token"))
+                    location.href="http://localhost:63343/layer01/html/index.html?name="+name;
+                }
+            })
+        })
+
+        function getCookie(cname)
+        {
+            var name = cname + "=";
+            var ca = document.cookie.split(';');
+            for(var i=0; i<ca.length; i++)
+            {
+                var c = ca[i].trim();
+                if (c.indexOf(name)==0) return c.substring(name.length,c.length);
+            }
+            return "";
+        }
+    })
+</script>
+</body>
+</html>
